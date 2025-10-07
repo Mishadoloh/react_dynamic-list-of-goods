@@ -1,50 +1,62 @@
-
-import React, { useState } from 'react';
-
-import './App.scss';
-
+import React, { useState, useCallback } from 'react';
 import { GoodsList } from './GoodsList';
-
-// import { getAll, get5First, getRed } from './api/goods';
-// or
 import * as goodsAPI from './api/goods';
-
 import { Good } from './types/Good';
 
 export const App: React.FC = () => {
   const [goods, setGoods] = useState<Good[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadAllGoods = () => {
-    goodsAPI.getAll().then(setGoods);
-  };
+  const loadAllGoods = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await goodsAPI.getAll();
 
-  const load5FirstGoods = () => {
-    goodsAPI.get5First().then(setGoods);
-  };
+      setGoods(data);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }, []);
 
-  const loadRedGoods = () => {
-    goodsAPI.getRedGoods().then(setGoods);
-  };
+  const load5FirstGoods = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await goodsAPI.get5First();
+
+      setGoods(data);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }, []);
+
+  const loadRedGoods = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await goodsAPI.getRedGoods();
+
+      setGoods(data);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }, []);
 
   return (
     <div className="App">
-      <h1>Dynamic list of Goods</h1>
+      <h1>Dynamic list of goods</h1>
 
-      <button type="button" data-cy="all-button" onClick={loadAllGoods}>
-        Load all goods
+      <button data-cy="all-button" onClick={loadAllGoods}>
+        Load All goods
       </button>
 
-      <button
-        type="button"
-        data-cy="first-five-button"
-        onClick={load5FirstGoods}
-      >
+      <button data-cy="first-five-button" onClick={load5FirstGoods}>
         Load 5 first goods
       </button>
 
-      <button type="button" data-cy="red-button" onClick={loadRedGoods}>
+      <button data-cy="red-button" onClick={loadRedGoods}>
         Load red goods
       </button>
+
+      {error && <p style={{ color: 'red' }}>{error}</p>}
 
       <GoodsList goods={goods} />
     </div>
